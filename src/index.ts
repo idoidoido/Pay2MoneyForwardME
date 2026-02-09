@@ -1,4 +1,5 @@
 // Copyright (c) 2023-2025 Riki Singh Khorana. All rights reserved. MIT License.
+// Modified by idoido 2026
 
 import * as dotenv from "dotenv";
 import { RakutenPayWatcher } from "./RakutenPayWatcher";
