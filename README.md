@@ -1,6 +1,6 @@
-# 楽天ペイ → マネーフォワード ME
+# 楽天ペイ，ANAペイ，VポイントPay → マネーフォワード ME
 
-楽天ペイを利用した際に毎回送られてくる「楽天ペイアプリご利用内容確認メール」と「楽天ペイ 注文受付（自動配信メール）」から情報を抜き取り、
+楽天ペイANAペイ，VポイントPayを利用した際に毎回送られてくる利用内容確認メールから情報を抜き取り、
 マネーフォワード ME に自動入力するスクリプト。
 
 ## 制限
@@ -18,7 +18,8 @@
 1. 「Money Forward ID Additional Authentication via Email」が自動で `{namespace}.mf@inbox.testmail.app` に転送されるよう設定
 1. 「楽天ペイアプリご利用内容確認メール」が自動で `{namespace}.rp@inbox.testmail.app` に転送されるよう設定
 1. 「楽天ペイ 注文受付（自動配信メール）」が自動で `{namespace}.rp@inbox.testmail.app` に転送されるよう設定
-
+1. 「［ANA Pay］ご利用のお知らせ」「［ANA Pay］チャージ完了のお知らせ」が自動で `{namespace}.ap@inbox.testmail.app` に転送されるよう設定
+1. 「【VポイントPay】ご利用のお知らせ」「【VポイントPay】プリペイド残高加算のお知らせ」が自動で `{namespace}.vp@inbox.testmail.app` に転送されるよう設定
     > メールの自動転送の設定方法
     > - [Gmail の場合](https://support.google.com/mail/answer/10957)
     > - [Outlook の場合](https://support.microsoft.com/en-us/office/turn-on-automatic-forwarding-in-outlook-7f2670a1-7fff-4475-8a3c-5822d63b0c8e)
