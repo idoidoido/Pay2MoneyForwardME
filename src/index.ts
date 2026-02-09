@@ -2,6 +2,8 @@
 
 import * as dotenv from "dotenv";
 import { RakutenPayWatcher } from "./RakutenPayWatcher";
+import { ANAPayWatcher } from "./ANAPayWatcher";
+import { VpointPayWatcher } from "./VpointPayWatcher";
 import { exportToMoneyForwardME, Payment } from "./exportToMoneyForwardME";
 import { TestmailClient } from "./TestmailClient";
 
@@ -43,16 +45,23 @@ if (!MONEY_FORWARD_PW) {
  */
 
 process.stdout.write("\x1Bc");
-console.log("\x1b[1m\x1b[38;5;172m%s\x1b[0m", "\n   RakutenPay2MoneyForwardME 0.2.0\n");
+console.log("\x1b[1m\x1b[38;5;172m%s\x1b[0m", "\n   Pay2MoneyForwardME 0.3.0\n");
 
 /**
- * 「楽天ペイアプリご利用内容確認メール」と「楽天ペイ 注文受付（自動配信メール）」をウォッチ。
+ * メールをウォッチ。
  * 取引内容を抽出し、マネーフォワード ME に書き出す。
  */
 
-const rpTestmailClient = new TestmailClient(TESTMAIL_API_KEY, TESTMAIL_NAMESPACE, "rp");
-const mfTestmailClient = new TestmailClient(TESTMAIL_API_KEY, TESTMAIL_NAMESPACE, "mf");
+const rpTestmailClient = new TestmailClient(TESTMAIL_API_KEY, TESTMAIL_NAMESPACE, "rp");//楽天ペイメール
+const apTestmailClient = new TestmailClient(TESTMAIL_API_KEY, TESTMAIL_NAMESPACE, "ap");//ANA Payメール
+const vpTestmailClient = new TestmailClient(TESTMAIL_API_KEY, TESTMAIL_NAMESPACE, "vp");//VポイントPayメール
+const mfTestmailClient = new TestmailClient(TESTMAIL_API_KEY, TESTMAIL_NAMESPACE, "mf");//MF認証メール
+const now = new Date();
+
 const watcher = new RakutenPayWatcher(rpTestmailClient);
+const watcher2 = new ANAPayWatcher(apTestmailClient);
+const watcher3 = new VpointPayWatcher(vpTestmailClient);
+
 watcher.subscribe((transactions) => {
   const payments: Payment[] = [];
   transactions.forEach((transaction) => {
@@ -77,7 +86,8 @@ watcher.subscribe((transactions) => {
       });
     }
 
-    if (cashUsed > 0) {
+    if (cashUsed != 0 ) {
+	if(!merchant.match(/ANA Pay/)){
       console.log(` ⏬ ${date} ${merchant} 楽天キャッシュ利用 ${cashUsed}`);
       payments.push({
         largeCategory: "0",
@@ -87,6 +97,17 @@ watcher.subscribe((transactions) => {
         source: "0",
         content: `${merchant} 楽天キャッシュ利用`,
       });
+	}else{
+      console.log(` ⏬ ${date} ${merchant} ${cashUsed}`);
+      payments.push({
+        largeCategory: "0",
+        middleCategory: "0",
+        date,
+        amount: cashUsed,
+        source: "ANA Pay",
+        content: `${merchant}`,
+      });
+	}
     }
   });
 
@@ -97,6 +118,85 @@ watcher.subscribe((transactions) => {
     exportToMoneyForwardME(MONEY_FORWARD_EMAIL, MONEY_FORWARD_PW, mfTestmailClient, payments)
       .catch((e) => {
         console.error(`\n ${dateString} ${timeString} ❌ マネーフォワードへの書き出しに失敗しました。`);
+        console.error(e);
+        console.log();
+      });
+  }
+});
+
+
+watcher2.subscribe((transactions) => {
+  const payments: Payment[] = [];
+  transactions.forEach((transaction) => {
+    const {
+      date,
+      merchant,
+      totalAmount,
+    } = transaction;
+
+    // TODO: Dynamically edit category
+
+
+    if (totalAmount != 0 ) {
+      console.log(` ⏬ ${date} ${merchant} ${totalAmount}`);
+      payments.push({
+        largeCategory: "0",
+        middleCategory: "0",
+        date,
+        amount: totalAmount,
+        source: "ANA Pay",
+        content: `${merchant}`,
+      });
+
+    }
+  });
+
+  if (payments.length > 0) {
+    const now = new Date();
+    const dateString = now.toISOString().split("T")[0].replaceAll("-", "/");
+    const timeString = now.toLocaleTimeString();
+    exportToMoneyForwardME(MONEY_FORWARD_EMAIL, MONEY_FORWARD_PW, mfTestmailClient, payments)
+      .catch((e) => {
+        console.error(`\n ${dateString} ${timeString} ❌ マネーフォワードへの書き出しに失敗しました。`);
+        console.error(e);
+        console.log();
+      });
+  }
+});
+
+watcher3.subscribe((transactions) => {
+  const payments: Payment[] = [];
+  transactions.forEach((transaction) => {
+    const {
+      date,
+      merchant,
+      totalAmount,
+    } = transaction;
+
+    // TODO: Dynamically edit category
+
+
+    if (totalAmount != 0 ) {
+      console.log(` ⏬ ${date} ${merchant} ${totalAmount}`);
+      payments.push({
+        largeCategory: "0",
+        middleCategory: "0",
+        date,
+        amount: totalAmount,
+        source: "VポイントPay",
+        content: `${merchant}`,
+      });
+
+    }
+  });
+
+  if (payments.length > 0) {
+    const now = new Date();
+    const dateString = now.toISOString().split("T")[0].replaceAll("-", "/");
+    const timeString = now.toLocaleTimeString();
+    exportToMoneyForwardME(MONEY_FORWARD_EMAIL, MONEY_FORWARD_PW, mfTestmailClient, payments)
+      .catch((e) => {
+        console.error(`\n ${dateString} ${timeString} ?? マネーフォワードへの書き出しに失敗しました。`);
         console.error(e);
         console.log();
       });

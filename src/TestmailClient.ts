@@ -52,6 +52,8 @@ interface ApiResponse {
 
 export interface EmailObject {
   id: string;
+  date: string;
   html?: string;
   downloadUrl: string;
+  text?: string;// textも取得
 };

@@ -2,6 +2,7 @@
 
 import { parse } from "node-html-parser";
 import type { TestmailClient } from "./TestmailClient";
+import readline from 'readline'
 
 /**
  * testmail.app に送られてくる「楽天ペイアプリご利用内容確認メール」と
@@ -27,13 +28,15 @@ export class RakutenPayWatcher {
    * @param testmailClient testmail.app client オブジェクト
    * @param pingInterval メールサーバーへの ping 頻度。デフォルト５分
    */
+
   constructor(
     testmailClient: TestmailClient,
-    pingInterval = 5 * 60 * 1000
+    pingInterval = 2 * 60 * 1000,
   ) {
     this.testmailClient = testmailClient;
     this.subscribers = [];
-    setInterval(() => this.ping(), pingInterval);
+    const start = new Date();
+    setInterval(() => this.ping(start), pingInterval);
   }
 
   subscribe(fn: RakutenPaySubscriber) {
@@ -44,27 +47,41 @@ export class RakutenPayWatcher {
    * Pings the mail server.
    * Extracts the transaction information and notifies subscribers on new mail.
    */
-  private async ping() {
+  private async ping(start: Date) {
     const now = new Date();
     const dateString = now.toISOString().split("T")[0].replaceAll("-", "/");
     const timeString = now.toLocaleTimeString();
+      if(this.lastPing == undefined) this.lastPing = start;
     try {
       const emails = await this.testmailClient.get(this.lastPing);
-      if (!emails) {
-        return;
+readline.cursorTo(process.stdout, 0);
+process.stdout.write(dateString+" "+timeString)
+      if (emails === undefined){
+		return;
+	}else if(emails.length === 0) {
+	        return;
       }
 
       this.lastPing = now;
       const transactions: RakutenPayTransaction[] = [];
-      for (const { html, downloadUrl } of emails) {
+      for (const { html, downloadUrl, text } of emails) {
         if (!html) {
-          continue;
-        }
+		if (!text){
+			continue;
+		}else{
 
-        const transaction = this.parseEmailBody(html);
+		var transaction = this.parseEmailBody(text);
+		
+		}
+	}else{
+	
+		var transaction = this.parseEmailBody(html);
+
+	}
+
         if (
           this.isValidTransaction(transaction)
-          && (transaction.pointsUsed > 0 || transaction.cashUsed > 0)
+/*          && (transaction.pointsUsed > 0 || transaction.cashUsed > 0)*/
         ) {
           transactions.push(transaction);
         } else {
@@ -171,9 +188,35 @@ export class RakutenPayWatcher {
           break;
         }
 
-        default: { /* do nothing */ }
+        default: {
+
+	}
       }
     });
+
+if(!result.date){
+  for(const line of body.split('\n')){
+        if(line.startsWith("ご利用") || line.startsWith("チャージ金額")){
+            const [key,value] = line.split("：")
+            if(key == "ご利用日時"){
+                result.date = value.split(" ")[0].replace(/-/g,"/")
+            }else if(key == "ご利用金額"){
+                result.totalAmount = parseInt(value.replace("円", "").replace(",",""))
+		result.cashUsed = result.totalAmount
+            }else if(key == "ご利用店舗"){
+                result.merchant = value.replace("<br>","")+" [ANA Pay]"
+	    }else if(key == "チャージ金額"){
+		const now = new Date();
+    		const dateString = now.toISOString().split("T")[0].replaceAll("-", "/");
+		result.date = dateString
+                result.totalAmount = -parseInt(value.replace("円", "").replace(",",""))
+		result.cashUsed = result.totalAmount
+		result.merchant = "ANA Pay"
+	    }
+	}
+}
+}
+
 
     return result;
   }

@@ -95,6 +95,9 @@ export async function exportToMoneyForwardME(
       } = payment;
 
       const tab = await browser.newPage();
+
+if(amount > 0){
+
       await tab.goto("https://moneyforward.com");
 
       await tab.$eval("#user_asset_act_large_category_id", (el, val) => {
@@ -110,11 +113,55 @@ export async function exportToMoneyForwardME(
       }, date);
 
       await tab.type("#js-cf-manual-payment-entry-amount", amount.toString());
-      await tab.select("#user_asset_act_sub_account_id_hash", source);
+//      await tab.select("#user_asset_act_sub_account_id_hash", source);
       content && await tab.type("#js-cf-manual-payment-entry-content", content);
+
+
+      //source名を含む財布を選択
+      const optionValue = await tab.$$eval('option', ( options, value ) => options.find(o => o.innerText.match(value) )?.value, source)
+      if(optionValue){
+	await tab.select('#user_asset_act_sub_account_id_hash', optionValue);
+      }
+
+
       await tab.click("#js-cf-manual-payment-entry-submit-button");
 
+
+}else{//金額がマイナスの場合は入金処理
+
+      await tab.goto("https://moneyforward.com/cf#cf_new");
+
+      await tab.click("#info");
+
+      await tab.$eval("#user_asset_act_large_category_id", (el, val) => {
+        (el as HTMLInputElement).value = val;
+      }, largeCategory);
+
+      await tab.$eval("#user_asset_act_middle_category_id", (el, val) => {
+        (el as HTMLInputElement).value = val;
+      }, middleCategory);
+
+      await tab.$eval("#updated-at", (el, val) => {
+        (el as HTMLInputElement).value = val;
+      }, date);
+
+      await tab.type("#appendedPrependedInput", (-amount).toString());
+
+
+      //source名を含む財布を選択
+      const optionValue = await tab.$$eval('option', ( options, value ) => options.find(o => o.innerText.match(value) )?.value, source)
+      if(optionValue){
+	await tab.select('#user_asset_act_sub_account_id_hash', optionValue);
+      }
+
+      await tab.click("#submit-button");
+
+
+}
+
       await delay(5_000); // Wait 5 seconds for submission to complete
+
+
     }
   } catch (err) {
     throw err;
