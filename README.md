@@ -23,7 +23,7 @@
     > メールの自動転送の設定方法
     > - [Gmail の場合](https://support.google.com/mail/answer/10957)
     > - [Outlook の場合](https://support.microsoft.com/en-us/office/turn-on-automatic-forwarding-in-outlook-7f2670a1-7fff-4475-8a3c-5822d63b0c8e)
-1. マネフォーワードで「ANA Pay」，「VポイントPay」を名前に含む財布を作成しておくと，残高に利用，チャージした金額を反映可能
+1. マネーフォーワードで「ANA Pay」，「VポイントPay」を名前に含む財布を作成しておくと，残高に利用，チャージした金額を反映可能
 ### 2. ⬇️ `npm install`
 
 ```sh
