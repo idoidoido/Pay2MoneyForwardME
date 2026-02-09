@@ -19,15 +19,15 @@
 1. 「楽天ペイアプリご利用内容確認メール」が自動で `{namespace}.rp@inbox.testmail.app` に転送されるよう設定
 1. 「楽天ペイ 注文受付（自動配信メール）」が自動で `{namespace}.rp@inbox.testmail.app` に転送されるよう設定
 1. 「［ANA Pay］ご利用のお知らせ」「［ANA Pay］チャージ完了のお知らせ」が自動で `{namespace}.ap@inbox.testmail.app` に転送されるよう設定
-1. 「【VポイントPay】ご利用のお知らせ」「【VポイントPay】プリペイド残高加算のお知らせ」が自動で `{namespace}.vp@inbox.testmail.app` に転送されるよう設定
+1. 「【VポイントPay】ご利用のお知らせ」「【VポイントPay】プリペイド残高加算のお知らせ」が自動で `{namespace}.vp@inbox.testmail.app` に転送されるよう設定 
     > メールの自動転送の設定方法
     > - [Gmail の場合](https://support.google.com/mail/answer/10957)
     > - [Outlook の場合](https://support.microsoft.com/en-us/office/turn-on-automatic-forwarding-in-outlook-7f2670a1-7fff-4475-8a3c-5822d63b0c8e)
-
+1. マネフォーワードで「ANA Pay」，「VポイントPay」を名前に含む財布を作成しておくと，残高に利用，チャージした金額を反映可能
 ### 2. ⬇️ `npm install`
 
 ```sh
-$ git clone https://github.com/rikilele/RakutenPay2MoneyForwardME.git
+$ git clone https://github.com/idoidoido/Pay2MoneyForwardME.git
 $ npm install
 ```
 
